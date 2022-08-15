@@ -35,7 +35,6 @@ describe('AppController (e2e)', () => {
       .send(testDto)
       .expect(201)
       .then(({ body }: request.Response) => {
-        console.log(body);
         createdId = body._id;
         expect(createdId).toBeDefined();
       });
@@ -46,7 +45,6 @@ describe('AppController (e2e)', () => {
       .get('/review/byProduct/' + productId)
       .expect(200)
       .then(({ body }: request.Response) => {
-        console.log(body);
         expect(body.length).toBe(1);
       });
   });
@@ -56,7 +54,6 @@ describe('AppController (e2e)', () => {
       .get('/review/byProduct/' + productId)
       .expect(200)
       .then(({ body }: request.Response) => {
-        console.log(body);
         expect(body.length).toBe(1);
       });
   });
@@ -66,7 +63,6 @@ describe('AppController (e2e)', () => {
       .get('/review/byProduct/' + new Types.ObjectId().toHexString())
       .expect(200)
       .then(({ body }: request.Response) => {
-        console.log(body);
         expect(body.length).toBe(0);
       });
   });

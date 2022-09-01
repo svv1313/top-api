@@ -5,9 +5,9 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { getJWTConfig } from 'src/config/jwt.config';
+import { getJWTConfig } from '../config/jwt.config';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from 'src/strategies/jwt.strategy';
+import { JwtStrategy } from '../strategies/jwt.strategy';
 
 @Module({
   controllers: [AuthController],

@@ -15,6 +15,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { UserEmail } from 'src/decorators/use-email.decorator';
 
 @Controller('review')
 export class ReviewController {

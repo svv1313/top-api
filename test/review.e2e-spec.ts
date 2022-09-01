@@ -1,3 +1,4 @@
+import { AuthDto } from './../src/auth/dto/auth.dto';
 import { REVIEW_NOT_FOUND } from './../src/review/review.constants';
 import { Types, disconnect } from 'mongoose';
 import { CreateReviewDto } from './../src/review/dto/create-review.dto';
@@ -5,6 +6,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { WRONG_PASSWORD_ERROR } from '../src/auth/auth.constants';
 
 const productId = new Types.ObjectId().toHexString();
 
@@ -16,9 +18,15 @@ const testDto: CreateReviewDto = {
   productId,
 };
 
+const loginDto: AuthDto = {
+  login: 'new-user2@gmail.com',
+  password: '1',
+};
+
 describe('AppController (e2e)', () => {
   let app: INestApplication;
   let createdId: string;
+  let token: string;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -27,6 +35,11 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+
+    const { body } = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send(loginDto);
+    token = body.access_token;
   });
 
   it('/review/create (POST) - success', async () => {
@@ -77,6 +90,7 @@ describe('AppController (e2e)', () => {
   it('/review/:id (DELETE) - success', async () => {
     return request(app.getHttpServer())
       .delete('/review/' + createdId)
+      .set('Authorization', `Bearer ${token}`)
       .expect(200);
   });
 
@@ -84,9 +98,28 @@ describe('AppController (e2e)', () => {
     const newProductId = new Types.ObjectId().toHexString();
     return request(app.getHttpServer())
       .delete('/review/' + newProductId)
+      .set('Authorization', `Bearer ${token}`)
       .expect(404, {
         statusCode: 404,
         message: `${REVIEW_NOT_FOUND} ${newProductId}`,
+      });
+  });
+
+  it('/auth/login (POST) - success', async () => {
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .send(loginDto)
+      .expect(200);
+  });
+
+  it('/auth/login (POST) - fail (wrong password)', async () => {
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ ...loginDto, password: '123' })
+      .expect({
+        statusCode: 401,
+        message: WRONG_PASSWORD_ERROR,
+        error: 'Unauthorized',
       });
   });
 

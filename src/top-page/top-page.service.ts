@@ -33,6 +33,8 @@ export class TopPageService {
   }
 
   async find(dto: FindTopPageDto) {
-    return this.topPageModel.find(dto).exec();
+    return this.topPageModel
+      .find(dto, { alias: 1, secondCategory: 1, title: 1 })
+      .exec();
   }
 }

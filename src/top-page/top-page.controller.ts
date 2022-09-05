@@ -19,13 +19,18 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ALIAS_ALREADY_EXIST, TOP_PAGE_NOT_FOUND } from './top-page.constans';
+import {
+  ALIAS_ALREADY_EXIST,
+  TOP_PAGE_NOT_FOUND,
+  TOP_PAGE_WITH_ID_NOT_FOUND,
+} from './top-page.constans';
 
 @Controller('top-page')
 export class TopPageController {
   constructor(private readonly topPageService: TopPageService) {}
 
   @UsePipes(new ValidationPipe())
+  @UseGuards(JwtAuthGuard)
   @Post('create')
   async create(@Body() dto: CreateTopPageDTO) {
     const IsAliasExist = await this.topPageService.findByAlias(dto.alias);
@@ -35,9 +40,23 @@ export class TopPageController {
     return this.topPageService.create(dto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async get(@Param('id', IdValidationPipe) id: string) {
-    return this.topPageService.findById(id);
+    const page = await this.topPageService.findById(id);
+    if (!page) {
+      throw new NotFoundException(TOP_PAGE_WITH_ID_NOT_FOUND);
+    }
+    return page;
+  }
+
+  @Get('/findByAlias/:alias')
+  async findByAlias(@Param('alias') alias: string) {
+    const page = await this.topPageService.findByAlias(alias);
+    if (!page) {
+      throw new NotFoundException(TOP_PAGE_WITH_ID_NOT_FOUND);
+    }
+    return page;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -49,6 +68,7 @@ export class TopPageController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async patch(
     @Param('id', IdValidationPipe) id: string,

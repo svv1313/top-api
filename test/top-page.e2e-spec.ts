@@ -64,6 +64,7 @@ describe('TopPageController (e2e)', () => {
   it('/top-page/create (POST) - success', async () => {
     return request(app.getHttpServer())
       .post('/top-page/create')
+      .set('Authorization', `Bearer ${token}`)
       .send(testDto)
       .expect(201)
       .then(({ body }: request.Response) => {
@@ -72,9 +73,17 @@ describe('TopPageController (e2e)', () => {
       });
   });
 
+  it('/top-page/create (POST) - fail(Authorization failed)', async () => {
+    return request(app.getHttpServer())
+      .post('/top-page/create')
+      .send(testDto)
+      .expect(401);
+  });
+
   it('/top-page/create (POST) - fail(Alias Already Exist)', () => {
     return request(app.getHttpServer())
       .post('/top-page/create')
+      .set('Authorization', `Bearer ${token}`)
       .send({ ...testDto, alias: 'E2E_alias' })
       .expect({
         statusCode: 400,
@@ -86,6 +95,7 @@ describe('TopPageController (e2e)', () => {
   it('/top-page/create (POST) - fail', () => {
     return request(app.getHttpServer())
       .post('/top-page/create')
+      .set('Authorization', `Bearer ${token}`)
       .send({ ...testDto, firstLevel: 10 })
       .expect(400);
   });
@@ -93,29 +103,50 @@ describe('TopPageController (e2e)', () => {
   it('/top-page/:id (GET) - success', async () => {
     return request(app.getHttpServer())
       .get('/top-page/' + createdId)
+      .set('Authorization', `Bearer ${token}`)
       .expect(200)
       .then(({ body }: request.Response) => {
         expect(body.alias).toBe(alias);
       });
   });
 
-  it('/top-page/:id (GET) - fail', async () => {
+  it('/top-page/:id (GET) - fail(Page not found)', async () => {
     return request(app.getHttpServer())
       .get('/top-page/' + new Types.ObjectId().toHexString())
-      .expect(200)
-      .then(({ body }: request.Response) => {
-        expect(body.alias).toBeUndefined();
-      });
+      .set('Authorization', `Bearer ${token}`)
+      .expect(404);
   });
 
   it('/top-page/:id (GET) - fail(Top page id is not ObjectId)', async () => {
     return request(app.getHttpServer())
       .get('/top-page/' + '123321')
+      .set('Authorization', `Bearer ${token}`)
       .expect({
         statusCode: 400,
         message: ID_VALIDATION_ERROR,
         error: 'Bad Request',
       });
+  });
+
+  it('/top-page/:id (GET) - fail(Authorization failed)', async () => {
+    return request(app.getHttpServer())
+      .get('/top-page/' + createdId)
+      .expect(401);
+  });
+
+  it('/top-page/findByAlias/:alias (GET) - success', async () => {
+    return request(app.getHttpServer())
+      .get('/top-page/findByAlias/' + testDto.alias)
+      .expect(200)
+      .then(({ body }: request.Response) => {
+        expect(body.alias).toBe(testDto.alias);
+      });
+  });
+
+  it('/top-page/findByAlias/:alias (GET) - fail', async () => {
+    return request(app.getHttpServer())
+      .get('/top-page/findByAlias/' + 'random-alias')
+      .expect(404);
   });
 
   it('/top-page (POST) - success', async () => {
@@ -138,10 +169,11 @@ describe('TopPageController (e2e)', () => {
       });
   });
 
-  it('/top-page (POST) - success', async () => {
+  it('/top-page (PATCH) - success', async () => {
     const category = 'new category';
     return request(app.getHttpServer())
       .patch('/top-page/' + createdId)
+      .set('Authorization', `Bearer ${token}`)
       .send({ category })
       .expect(200)
       .then(({ body }: request.Response) => {
@@ -149,11 +181,25 @@ describe('TopPageController (e2e)', () => {
       });
   });
 
+  it('/top-page (PATCH) - fail(Authorization failed)', async () => {
+    const category = 'new category';
+    return request(app.getHttpServer())
+      .patch('/top-page/' + createdId)
+      .send({ category })
+      .expect(401);
+  });
+
   it('/top-page/:id (DELETE) - success', async () => {
     return request(app.getHttpServer())
       .delete('/top-page/' + createdId)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
+  });
+
+  it('/top-page/:id (DELETE) - fail(Authorization failed)', async () => {
+    return request(app.getHttpServer())
+      .delete('/top-page/' + createdId)
+      .expect(401);
   });
 
   afterAll(() => {

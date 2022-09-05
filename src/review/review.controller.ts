@@ -15,7 +15,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { IdValidationPipe } from 'src/pipes/ad-validation.pipe';
+import { IdValidationPipe } from '../pipes/ad-validation.pipe';
 
 @Controller('review')
 export class ReviewController {

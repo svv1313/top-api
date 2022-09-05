@@ -50,6 +50,11 @@ export class TopPageController {
     return page;
   }
 
+  @Get('/textSearch/:text')
+  async textSearch(@Param('text') text: string) {
+    return this.topPageService.findByText(text);
+  }
+
   @Get('/findByAlias/:alias')
   async findByAlias(@Param('alias') alias: string) {
     const page = await this.topPageService.findByAlias(alias);

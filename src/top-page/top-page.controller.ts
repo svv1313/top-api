@@ -89,7 +89,7 @@ export class TopPageController {
   @HttpCode(200)
   @Post()
   async find(@Body() dto: FindTopPageDto) {
-    const foundTopPage = await this.topPageService.find(dto);
+    const foundTopPage = await this.topPageService.find(dto.firstLevel);
     if (!foundTopPage) {
       throw new NotFoundException(TOP_PAGE_NOT_FOUND);
     }
